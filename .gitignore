@@ -14,7 +14,6 @@ env/
 .idea/
 .DS_Store
 Thumbs.db
-media/
 *.pyc
 __pycache__/
 */migrations/__pycache__/
