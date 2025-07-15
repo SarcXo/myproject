@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная страница{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-5 {% if not featured_posts %}d-none{% endif %}">  <!-- Добавлен d-none если нет постов -->
+        <div id="postCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                {% for post in featured_posts %}
+                <button type="button" data-bs-target="#postCarousel" data-bs-slide-to="{{ forloop.counter0 }}"
+                        {% if forloop.first %}class="active" aria-current="true"{% endif %}
+                        aria-label="Slide {{ forloop.counter }}"></button>
+                {% endfor %}
+            </div>
+            <div class="carousel-inner rounded">
+                {% for post in featured_posts %}
+                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                    {% if post.image %}
+                    <img src="{{ post.image.url }}" class="d-block w-100" style="height: 400px; object-fit: cover;" alt="{{ post.title }}">
+                    {% else %}
+                    <div class="d-block w-100 bg-secondary" style="height: 400px;"></div>
+                    {% endif %}
+                    <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded p-3">
+                        <h5>{{ post.title }}</h5>
+                        <p>{{ post.content|truncatechars:100 }}</p>
+                        <a href="{% url 'post_detail' pk=post.pk %}" class="btn btn-primary">Читать далее</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#postCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Предыдущий</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#postCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Следующий</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="{% if user.is_authenticated %}col-md-8{% else %}col-12{% endif %}">
+        <h2 class="mb-4">Последние публикации</h2>
+        {% for post in latest_posts %}
+        <div class="card mb-4">
+            {% if post.image %}
+            <img src="{{ post.image.url }}" class="card-img-top" style="height: 300px; object-fit: cover;" alt="{{ post.title }}">
+            {% endif %}
+            <div class="card-body">
+                <h3 class="card-title">{{ post.title }}</h3>
+                <p class="card-text">{{ post.content|truncatechars:200 }}</p>
+                <a href="{% url 'post_detail' pk=post.pk %}" class="btn btn-primary">Читать далее</a>
+            </div>
+            <div class="card-footer text-muted">
+                Опубликовано {{ post.published_date|date:"d.m.Y H:i" }} |
+                Автор: {{ post.author.username }} |
+                Категория: <a href="{% url 'category_list' %}?category={{ post.category.id }}">{{ post.category.name }}</a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="alert alert-info">Пока нет публикаций. Будьте первым!</div>
+        {% endfor %}
+    </div>
+
+    {% if user.is_authenticated %}
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Категории</h5>
+            </div>
+            <div class="card-body">
+                {% if categories %}
+                <ul class="list-group">
+                    {% for category in categories %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="{% url 'category_list' %}?category={{ category.id }}" class="text-decoration-none">
+                            {{ category.name }}
+                        </a>
+                        <span class="d-flex align-items-center">
+                            <span class="badge bg-primary rounded-pill me-2">{{ category.post_set.count }}</span>
+                            {% if user.is_staff %}
+                            <a href="{% url 'edit_category' category.pk %}" class="btn btn-sm btn-outline-primary me-1">Изменить</a>
+                            <a href="{% url 'delete_category' category.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+                            {% endif %}
+                        </span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="alert alert-warning">Категории не найдены. Пожалуйста, создайте хотя бы одну.</div>
+                {% endif %}
+                <a href="{% url 'create_category' %}" class="btn btn-outline-success mt-3 w-100">Создать категорию</a>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Мои действия</h5>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'create_post' %}" class="btn btn-success w-100 mb-2">Создать пост</a>
+                <a href="{% url 'profile' %}" class="btn btn-outline-primary w-100">Мой профиль</a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

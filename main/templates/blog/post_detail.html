@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>{{ post.title }}</h1>
+    {% if user == post.author %}
+        <div class="mt-4 d-flex gap-2">
+            <a href="{% url 'post_edit' pk=post.pk %}" class="btn btn-warning">
+                <i class="bi bi-pencil-square"></i> Редактировать
+            </a>
+            <form action="{% url 'post_delete' pk=post.pk %}" method="post" onsubmit="return confirm('Удалить пост?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Удалить
+                </button>
+            </form>
+        </div>
+    {% endif %}
+
+    <p class="text-muted">
+        Автор: {{ post.author.username }} |
+        Опубликовано: {{ post.published_date|date:"d.m.Y H:i" }}
+    </p>
+
+    {% if post.image %}
+        <img src="{{ post.image.url }}" alt="{{ post.title }}" class="img-fluid mb-4">
+    {% endif %}
+
+    <div>
+        {{ post.content|linebreaks }}
+    </div>
+
+    <hr>
+
+    <h3>Комментарии</h3>
+    {% if comments %}
+        <ul class="list-group mb-4">
+            {% for comment in comments %}
+                <li class="list-group-item">
+                    <strong>{{ comment.author.username }}</strong>
+                    <small class="text-muted">{{ comment.created_at|date:"d.m.Y H:i" }}</small>
+                    <p>{{ comment.text|linebreaks }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Пока нет комментариев.</p>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+        <h4>Оставить комментарий</h4>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div class="mb-3">
+                {{ form.text.label_tag }}
+                {{ form.text }}
+                {{ form.text.errors }}
+            </div>
+            <button type="submit" class="btn btn-primary">Отправить</button>
+        </form>
+    {% else %}
+        <p>Чтобы оставить комментарий, пожалуйста, <a href="{% url 'login' %}">войдите в систему</a>.</p>
+    {% endif %}
+
+    <a href="{% url 'home' %}" class="btn btn-secondary mt-4">← Назад</a>
+</div>
+{% endblock %}

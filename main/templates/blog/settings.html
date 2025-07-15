@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Настройки{% endblock %}
+
+{% block content %}
+<h2>Настройки пользователя</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <fieldset class="mb-3">
+        <legend>Цветовая тема</legend>
+        {% for radio in form.theme %}
+            <div class="form-check">
+                {{ radio.tag }}
+                <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+            </div>
+        {% endfor %}
+        {{ form.theme.errors }}
+    </fieldset>
+
+    <div class="form-check mb-3">
+        {{ form.notifications_enabled }}
+        <label class="form-check-label" for="{{ form.notifications_enabled.id_for_label }}">
+            {{ form.notifications_enabled.label }}
+        </label>
+        <div class="form-text">{{ form.notifications_enabled.help_text }}</div>
+        {{ form.notifications_enabled.errors }}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Сохранить настройки</button>
+</form>
+{% endblock %}
